@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Globalization;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Text;
 using MushroomPocket.Models;
+
+// TODO: Ensure EFCore SQLite used correctly
+// TODO: Remove option
+// TODO: Battle / Adventure option
+// TODO: Heal option
+// TODO: ASCII Art?
+// TODO: Coins / Powerups system?
+// TODO: Multiplayer??
 
 namespace MushroomPocket
 {
@@ -13,7 +22,7 @@ namespace MushroomPocket
     {
         public static PocketContext pocketContext = new PocketContext();
         public static List<MushroomMaster> MushroomMastersList;
-        public static Dictionary<string, string> TransformedSkills = new Dictionary<string, string>();
+        public static Dictionary<string, string> CharacterSkills = new Dictionary<string, string>();
 
         public static void Main(string[] args)
         {   
@@ -28,9 +37,12 @@ namespace MushroomPocket
             };
             MushroomMastersList = mushroomMasters;
 
-            TransformedSkills.Add("Luigi", "Precision and Accuracy");
-            TransformedSkills.Add("Peach", "Magic Abilities");
-            TransformedSkills.Add("Mario", "Combat Skills");
+            CharacterSkills.Add("Waluigi", "Agility");
+            CharacterSkills.Add("Daisy", "Leadership");
+            CharacterSkills.Add("Wario", "Strength");
+            CharacterSkills.Add("Luigi", "Precision and Accuracy");
+            CharacterSkills.Add("Peach", "Magic Abilities");
+            CharacterSkills.Add("Mario", "Combat Skills");
 
             pocketContext.Database.EnsureCreated();
 
@@ -39,7 +51,7 @@ namespace MushroomPocket
                 {
                     break;
                 }
-            }            
+            }
         }
 
         public static bool Menu()
@@ -51,6 +63,7 @@ namespace MushroomPocket
             Console.WriteLine("(2). List character(s) in my pocket");
             Console.WriteLine("(3). Check if I can transform my characters");
             Console.WriteLine("(4). Transform characters(s)");
+            Console.WriteLine("(5). Remove characters");
             Console.WriteLine("Please only enter [1,2,3,4] or Q to quit: ");
 
             string option = Console.ReadLine();
@@ -69,6 +82,9 @@ namespace MushroomPocket
                 case "4":
                     Option4();
                     break;
+                case "5":
+                    Option5();
+                    break;
                 case "Q":
                     return false;
                 default:
@@ -85,7 +101,7 @@ namespace MushroomPocket
             int exp;
 
             Console.Write("Enter Character's Name: ");
-            name = Console.ReadLine();
+            name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Console.ReadLine());
 
             while (true)
             {
@@ -103,23 +119,26 @@ namespace MushroomPocket
                 break;
             }
 
-            Character character;
-
-            switch (name.ToLower())
+            List<string> AllowedCharacterNames = new List<string>
             {
-                case "waluigi":
-                    character = new Waluigi(hp, exp);
-                    break;
-                case "daisy":
-                    character = new Daisy(hp, exp);
-                    break;
-                case "wario":
-                    character = new Wario(hp, exp);
-                    break;
-                default:
-                    Console.WriteLine("Invalid Character");
-                    return;
+                "Waluigi",
+                "Daisy",
+                "Wario"
+            };
+
+            if (AllowedCharacterNames.ToList().IndexOf(name) == -1)
+            {
+                Console.WriteLine("Invalid Character");
+                return;
             }
+
+            Character character = new Character
+            {
+                Name = name,
+                HP = hp,
+                EXP = exp,
+                Skill = CharacterSkills[name]
+            };
 
             pocketContext.Pocket.Add(character);
             pocketContext.SaveChanges();
@@ -167,13 +186,53 @@ namespace MushroomPocket
                             Name = mushroom.TransformTo,
                             HP = 100,
                             EXP = 0,
-                            Skill = TransformedSkills[mushroom.TransformTo]
+                            Skill = CharacterSkills[mushroom.TransformTo]
                         };
                         pocketContext.Add(newCharacter);
                         pocketContext.Remove(character);
                         pocketContext.SaveChanges();
                     }
                 }
+            }
+        }
+
+        public static void Option5()
+        {
+            if (pocketContext.Pocket.ToList().Count <= 0)
+            {
+                Console.WriteLine("You do not have any characters in your pocket.");
+                return;
+            }
+
+            Console.WriteLine("Enter character name to remove:");
+            string characterName = Console.ReadLine();
+            List<Character> characters = pocketContext.Pocket.Where(c => c.Name.ToLower() == characterName.ToLower()).ToList();
+            
+            if (characters.Count == 0) {
+                pocketContext.Pocket.Remove(characters.First());
+                pocketContext.SaveChanges();
+                return;
+            }
+            else
+            {
+                Console.WriteLine($"Index - Name - HP - EXP");
+                foreach (Character character in characters)
+                {
+                    Console.WriteLine($"{characters.IndexOf(character)} - {character.Name} - {character.HP} - {character.EXP}");
+                }
+
+                string indexString = Console.ReadLine();
+                int index;
+
+                if (int.TryParse(indexString, out index) == false)
+                {
+                    Console.WriteLine("Invalid number");
+                    return;
+                }
+
+                pocketContext.Pocket.Remove(characters[index]);
+                Console.WriteLine("Character successfully removed.");
+                pocketContext.SaveChanges();
             }
         }
     }
