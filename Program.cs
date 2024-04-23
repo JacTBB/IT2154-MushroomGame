@@ -8,8 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using MushroomPocket.Models;
 
-// TODO: Ensure EFCore SQLite used correctly
-// TODO: Remove option
 // TODO: Battle / Adventure option
 // TODO: Heal option
 // TODO: ASCII Art?
@@ -161,13 +159,32 @@ namespace MushroomPocket
 
         public static void Option3()
         {
+            Dictionary<string, int> Counter = new Dictionary<string, int>
+            {
+                { "Waluigi", 0 },
+                { "Daisy", 0 },
+                { "Wario", 0 }
+            };
+            
             foreach(Character character in pocketContext.Pocket.ToList())
             {
                 foreach(MushroomMaster mushroom in MushroomMastersList)
                 {
                     if (character.Name == mushroom.Name)
                     {
-                        Console.WriteLine($"{character.Name} --> {mushroom.TransformTo}");
+                        Counter[character.Name]++;
+                    }
+                }
+            }
+
+            foreach(string name in Counter.Keys)
+            {
+                int count = Counter[name];
+                foreach (MushroomMaster mushroom in MushroomMastersList)
+                {
+                    if (name == mushroom.Name && count >= mushroom.NoToTransform)
+                    {
+                        Console.WriteLine($"{name} --> {mushroom.TransformTo}");
                     }
                 }
             }
@@ -175,21 +192,41 @@ namespace MushroomPocket
 
         public static void Option4()
         {
+            Dictionary<string, int> Counter = new Dictionary<string, int>
+            {
+                { "Waluigi", 0 },
+                { "Daisy", 0 },
+                { "Wario", 0 }
+            };
+
             foreach (Character character in pocketContext.Pocket.ToList())
             {
                 foreach (MushroomMaster mushroom in MushroomMastersList)
                 {
                     if (character.Name == mushroom.Name)
                     {
-                        Console.WriteLine($"{character.Name} has been transformed to {mushroom.TransformTo}");
-                        Character newCharacter = new Character{
+                        Counter[character.Name]++;
+                    }
+                }
+            }
+
+            foreach (string name in Counter.Keys)
+            {
+                int count = Counter[name];
+                foreach (MushroomMaster mushroom in MushroomMastersList)
+                {
+                    if (name == mushroom.Name && count >= mushroom.NoToTransform)
+                    {
+                        Console.WriteLine($"{name} has been transformed to {mushroom.TransformTo}");
+                        Character newCharacter = new Character
+                        {
                             Name = mushroom.TransformTo,
                             HP = 100,
                             EXP = 0,
                             Skill = CharacterSkills[mushroom.TransformTo]
                         };
                         pocketContext.Add(newCharacter);
-                        pocketContext.Remove(character);
+                        pocketContext.Pocket.RemoveRange(pocketContext.Pocket.Where(c => c.Name == name).Take(count));
                         pocketContext.SaveChanges();
                     }
                 }
