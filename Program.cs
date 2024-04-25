@@ -4,14 +4,15 @@ using System.ComponentModel.Design;
 using System.Globalization;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using MushroomPocket.Models;
 
-// TODO: Battle / Adventure option
-// TODO: Heal option
 // TODO: ASCII Art?
 // TODO: Coins / Powerups system?
+// TODO: A use for EXP?
 // TODO: Multiplayer??
 
 namespace MushroomPocket
@@ -21,6 +22,13 @@ namespace MushroomPocket
         public static PocketContext pocketContext = new PocketContext();
         public static List<MushroomMaster> MushroomMastersList;
         public static Dictionary<string, string> CharacterSkills = new Dictionary<string, string>();
+        public static Dictionary<string, int> SkillDamages = new Dictionary<string, int>();
+        public static List<Character> EnemyCharacters = new List<Character>
+        {
+                new Character("Bowser", 1000, 0, "Fire breath"),
+                new Character("Yoshi", 200, 0, "Powerful bite"),
+                new Character("Whomp", 100, 0, "Slam")
+        };
 
         public static void Main(string[] args)
         {   
@@ -42,6 +50,17 @@ namespace MushroomPocket
             CharacterSkills.Add("Peach", "Magic Abilities");
             CharacterSkills.Add("Mario", "Combat Skills");
 
+            SkillDamages.Add("Agility", 10);
+            SkillDamages.Add("Leadership", 15);
+            SkillDamages.Add("Strength", 20);
+            SkillDamages.Add("Precision and Accuracy", 30);
+            SkillDamages.Add("Magic Abilities", 35);
+            SkillDamages.Add("Combat Skills", 40);
+
+            SkillDamages.Add("Slam", 25);
+            SkillDamages.Add("Powerful bite", 30);
+            SkillDamages.Add("Fire breath", 100);
+
             pocketContext.Database.EnsureCreated();
 
             while (true) {
@@ -62,11 +81,14 @@ namespace MushroomPocket
             Console.WriteLine("(3). Check if I can transform my characters");
             Console.WriteLine("(4). Transform characters(s)");
             Console.WriteLine("(5). Remove characters");
+            Console.WriteLine("(6). Begin adventure");
+            Console.WriteLine("(7). Revive dead characters to 50 HP");
             Console.WriteLine("Please only enter [1,2,3,4] or Q to quit: ");
 
             string option = Console.ReadLine();
+            Console.WriteLine("\n");
 
-            switch (option)
+            switch (option.ToLower())
             {
                 case "1":
                     Option1();
@@ -83,7 +105,13 @@ namespace MushroomPocket
                 case "5":
                     Option5();
                     break;
-                case "Q":
+                case "6":
+                    Option6();
+                    break;
+                case "7":
+                    Option7();
+                    break;
+                case "q":
                     return false;
                 default:
                     Console.WriteLine("Invalid Input");
@@ -105,7 +133,8 @@ namespace MushroomPocket
             {
                 Console.Write("Enter Character's HP: ");
                 string input = Console.ReadLine();
-                if (!int.TryParse(input, out hp)) continue;
+                if (!int.TryParse(input, out hp)) { Console.WriteLine("Invalid number!"); continue; }
+                if (hp <= 0 || hp > 200) { Console.WriteLine("HP must be between 1 and 200!"); continue; }
                 break;
             }
 
@@ -113,7 +142,7 @@ namespace MushroomPocket
             {
                 Console.Write("Enter Character's EXP: ");
                 string input = Console.ReadLine();
-                if (!int.TryParse(input, out exp)) continue;
+                if (!int.TryParse(input, out exp)) { Console.WriteLine("Invalid number!"); continue; }
                 break;
             }
 
@@ -149,10 +178,10 @@ namespace MushroomPocket
             foreach (Character character in pocketContext.Pocket.OrderByDescending(c => c.HP).ToList())
             {
                 Console.WriteLine(new String('-', 20));
-                Console.WriteLine(character.Name);
-                Console.WriteLine(character.HP);
-                Console.WriteLine(character.EXP);
-                Console.WriteLine(character.Skill);
+                Console.WriteLine($"Name: {character.Name}");
+                Console.WriteLine($"HP: {character.HP}");
+                Console.WriteLine($"EXP: {character.EXP}");
+                Console.WriteLine($"Skill: {character.Skill}");
                 Console.WriteLine(new String('-', 20));
             }
         }
@@ -270,6 +299,103 @@ namespace MushroomPocket
                 pocketContext.Pocket.Remove(characters[index]);
                 Console.WriteLine("Character successfully removed.");
                 pocketContext.SaveChanges();
+            }
+        }
+
+        public static void Option6()
+        {
+            int DeadCharactersCount = pocketContext.Pocket.Where(c => c.HP == 0).ToList().Count();
+            List<Character> Characters = pocketContext.Pocket.OrderByDescending(c => c.HP).ToList();
+            Character CurrentCharacter;
+
+            if (DeadCharactersCount == pocketContext.Pocket.Count())
+            {
+                Console.WriteLine("All characters are dead, please revive them first.");
+                return;
+            }
+
+            Console.WriteLine("Choose your character:");
+            Console.WriteLine("Name - HP - EXP");
+            foreach (Character character in Characters)
+            {
+                if (character.HP > 0)
+                {
+                    Console.WriteLine($"{Characters.IndexOf(character)} - {character.Name} - {character.HP} - {character.EXP}");
+                }
+            }
+
+            while (true)
+            {
+                int index;
+                string input = Console.ReadLine();
+                if (!int.TryParse(input, out index)) { Console.WriteLine("Invalid number!"); continue; }
+                if (index < 0 || index > Characters.Count()-1) { Console.WriteLine($"Index must be between 0 and {Characters.Count()}!"); continue; }
+                CurrentCharacter = Characters[index];
+                break;
+            }
+
+            Console.WriteLine($"{CurrentCharacter.Name} selected");
+
+            Random random = new Random();
+
+            if (random.Next(0,3) == 0)
+            {
+                Console.WriteLine("You went on an adventure and found a powerup...");
+                int exp = random.Next(5, 10);
+                CurrentCharacter.EXP += exp;
+                Console.WriteLine($"{CurrentCharacter.Name} gained {exp} EXP.");
+            }
+            else
+            {
+                List<Character> AliveEnemies = EnemyCharacters.Where(c => c.HP > 0).ToList();
+                if (AliveEnemies.Count == 0)
+                {
+                    Console.WriteLine("All enemies are dead.");
+                    return;
+                }
+
+                Character EnemyCharacter = AliveEnemies[random.Next(0, AliveEnemies.Count()-1)];
+                Console.WriteLine($"You encountered {EnemyCharacter.Name} with {EnemyCharacter.HP}!");
+                Thread.Sleep(500);
+
+                while (CurrentCharacter.HP > 0 && EnemyCharacter.HP > 0)
+                {
+                    EnemyCharacter.HP = Math.Max(0, EnemyCharacter.HP - SkillDamages[CurrentCharacter.Skill]);
+                    Console.WriteLine($"{CurrentCharacter.Name} used {CurrentCharacter.Skill} and dealt {SkillDamages[CurrentCharacter.Skill]}");
+                    Thread.Sleep(500);
+                    if (EnemyCharacter.HP <= 0)
+                    {
+                        Console.WriteLine($"{EnemyCharacter.Name} died, you won!");
+                        int exp = random.Next(20, 50);
+                        CurrentCharacter.EXP += exp;
+                        Console.WriteLine($"{CurrentCharacter.Name} gained {exp} EXP.");
+                        break;
+                    }
+
+                    CurrentCharacter.HP = Math.Max(0, CurrentCharacter.HP - SkillDamages[EnemyCharacter.Skill]);
+                    pocketContext.SaveChanges();
+                    Console.WriteLine($"{EnemyCharacter.Name} used {EnemyCharacter.Skill} and dealt {SkillDamages[EnemyCharacter.Skill]}");
+                    Thread.Sleep(500);
+                    if (CurrentCharacter.HP <= 0)
+                    {
+                        Console.WriteLine($"{CurrentCharacter.Name} died, you lost!");
+                        break;
+                    }
+                }
+            }
+        }
+
+        public static void Option7()
+        {
+            foreach (Character character in pocketContext.Pocket.OrderByDescending(c => c.HP).ToList())
+            {
+                if (character.HP <= 0)
+                {
+                    character.HP = 50;
+                    pocketContext.SaveChanges();
+
+                    Console.WriteLine($"Revived {character.Name} to 50 HP");
+                }
             }
         }
     }
