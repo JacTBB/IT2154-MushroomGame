@@ -14,6 +14,7 @@ using MushroomPocket.Models;
 // TODO: Coins / Powerups system?
 // TODO: A use for EXP?
 // TODO: Multiplayer??
+// TODO: Check Validation
 
 namespace MushroomPocket
 {
@@ -83,7 +84,7 @@ namespace MushroomPocket
             Console.WriteLine("(5). Remove characters");
             Console.WriteLine("(6). Begin adventure");
             Console.WriteLine("(7). Revive dead characters to 50 HP");
-            Console.WriteLine("Please only enter [1,2,3,4] or Q to quit: ");
+            Console.WriteLine("Please only enter [1,2,3,4,5,6,7] or Q to quit: ");
 
             string option = Console.ReadLine();
             Console.WriteLine("\n");
@@ -91,25 +92,25 @@ namespace MushroomPocket
             switch (option.ToLower())
             {
                 case "1":
-                    Option1();
+                    Add();
                     break;
                 case "2":
-                    Option2();
+                    List();
                     break;
                 case "3":
-                    Option3();
+                    CheckTransform();
                     break;
                 case "4":
-                    Option4();
+                    Transform();
                     break;
                 case "5":
-                    Option5();
+                    Remove();
                     break;
                 case "6":
-                    Option6();
+                    Battle();
                     break;
                 case "7":
-                    Option7();
+                    Revive();
                     break;
                 case "q":
                     return false;
@@ -117,10 +118,13 @@ namespace MushroomPocket
                     Console.WriteLine("Invalid Input");
                     break;
             }
+
+            Console.WriteLine("\n");
+
             return true;
         }
 
-        public static void Option1()
+        public static void Add()
         {
             string name;
             int hp;
@@ -173,7 +177,7 @@ namespace MushroomPocket
             Console.WriteLine($"{name} has been added.");
         }
 
-        public static void Option2()
+        public static void List()
         {
             foreach (Character character in pocketContext.Pocket.OrderByDescending(c => c.HP).ToList())
             {
@@ -186,7 +190,7 @@ namespace MushroomPocket
             }
         }
 
-        public static void Option3()
+        public static void CheckTransform()
         {
             Dictionary<string, int> Counter = new Dictionary<string, int>
             {
@@ -219,7 +223,7 @@ namespace MushroomPocket
             }
         }
 
-        public static void Option4()
+        public static void Transform()
         {
             Dictionary<string, int> Counter = new Dictionary<string, int>
             {
@@ -262,7 +266,7 @@ namespace MushroomPocket
             }
         }
 
-        public static void Option5()
+        public static void Remove()
         {
             if (pocketContext.Pocket.ToList().Count <= 0)
             {
@@ -302,7 +306,7 @@ namespace MushroomPocket
             }
         }
 
-        public static void Option6()
+        public static void Battle()
         {
             int DeadCharactersCount = pocketContext.Pocket.Where(c => c.HP == 0).ToList().Count();
             List<Character> Characters = pocketContext.Pocket.OrderByDescending(c => c.HP).ToList();
@@ -385,7 +389,7 @@ namespace MushroomPocket
             }
         }
 
-        public static void Option7()
+        public static void Revive()
         {
             foreach (Character character in pocketContext.Pocket.OrderByDescending(c => c.HP).ToList())
             {

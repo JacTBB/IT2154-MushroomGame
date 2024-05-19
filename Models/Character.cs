@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MushroomPocket
+namespace MushroomPocket.Models
 {
     public class Character
     {
@@ -14,7 +14,7 @@ namespace MushroomPocket
         public string Name { get; set; }
         public int HP { get; set; }
         public int EXP { get; set; }
-        public string Skill {  get; set; }
+        public string Skill { get; set; }
 
         public Character() { } // For EntityFramework
         public Character(string name, int hp, int exp, string skill)
