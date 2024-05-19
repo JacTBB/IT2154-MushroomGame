@@ -16,7 +16,6 @@ using MushroomPocket.Services;
 // TODO: ASCII Art?
 // TODO: Powerups system?
 // TODO: Shop
-// TODO: A use for EXP? Damage Multiplier
 // TODO: Multiplayer??
 
 namespace MushroomPocket
@@ -107,6 +106,9 @@ namespace MushroomPocket
             return true;
         }
 
+        /// <summary>
+        /// Adds a new character
+        /// </summary>
         public static void Add()
         {
             string name;
@@ -161,6 +163,9 @@ namespace MushroomPocket
             Console.WriteLine($"{name} has been added.");
         }
 
+        /// <summary>
+        /// List all characters be HP Descending
+        /// </summary>
         public static void List()
         {
             using (PocketContext pocketContext = new PocketContext())
@@ -177,6 +182,9 @@ namespace MushroomPocket
             }
         }
 
+        /// <summary>
+        /// Checks if characters can transform
+        /// </summary>
         public static void CheckTransform()
         {
             Dictionary<string, int> Counter = new Dictionary<string, int>
@@ -213,6 +221,9 @@ namespace MushroomPocket
             }
         }
 
+        /// <summary>
+        /// Transforms eligible characters
+        /// </summary>
         public static void Transform()
         {
             Dictionary<string, int> Counter = new Dictionary<string, int>
@@ -270,6 +281,9 @@ namespace MushroomPocket
 
         }
 
+        /// <summary>
+        /// Remove 1 character
+        /// </summary>
         public static void Remove()
         {
             using (PocketContext pocketContext = new PocketContext())
@@ -313,6 +327,9 @@ namespace MushroomPocket
             }
         }
 
+        /// <summary>
+        /// Select a character to go on an adventure to get EXP, find coins or fight enemies
+        /// </summary>
         public static void Adventure()
         {
             using (PocketContext pocketContext = new PocketContext())
@@ -355,6 +372,9 @@ namespace MushroomPocket
             }
         }
 
+        /// <summary>
+        /// Revives all dead characters to 100 HP
+        /// </summary>
         public static void Revive()
         {
             using (PocketContext pocketContext = new PocketContext())
@@ -372,6 +392,9 @@ namespace MushroomPocket
             }
         }
     
+        /// <summary>
+        /// Shows user's current coins
+        /// </summary>
         public static void ShowCoins()
         {
             using (PocketContext pocketContext = new PocketContext())

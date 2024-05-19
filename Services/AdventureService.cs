@@ -8,12 +8,19 @@ using System.Threading.Tasks;
 
 namespace MushroomPocket.Services
 {
+    /// <summary>
+    /// Adventure Service to handle characters going on adventures.
+    /// Has Adventure Logic, EXP Logic, Battle Logic.
+    /// </summary>
     public class AdventureService
     {
         private PocketContext pocketContext;
         public Character character;
         private Random random = new Random();
 
+        /// <summary>
+        /// Base damages for skills of friendly and hostile characters
+        /// </summary>
         private static Dictionary<string, int> SkillDamages = new Dictionary<string, int>()
         {
             // Skill Damage - Friendly
@@ -30,6 +37,9 @@ namespace MushroomPocket.Services
             { "Fire Breath", 100 },
         };
 
+        /// <summary>
+        /// List of enemy characters per game session
+        /// </summary>
         private static List<Character> EnemyCharacters = new List<Character>
         {
                 new Character("Bowser", 1000, 0, "Fire Breath"),
@@ -75,12 +85,31 @@ namespace MushroomPocket.Services
             pocketContext.SaveChanges();
         }
 
+        /// <summary>
+        /// Randomly selects an enemy.
+        /// Friendly does damage according to skill & EXP.
+        /// Enemy does fixed damage.
+        /// Repeat.
+        /// </summary>
         public void Fight()
         {
             List<Character> AliveEnemies = EnemyCharacters.Where(c => c.HP > 0).ToList();
             if (AliveEnemies.Count == 0)
             {
                 Console.WriteLine("All enemies are dead, your adventure continues...");
+                int exp = random.Next(40, 100);
+                character.EXP += exp;
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine($"{character.Name} gained {exp} EXP.");
+                Console.ResetColor();
+                
+                // Resets Enemy Characters
+                EnemyCharacters = new List<Character>
+                {
+                        new Character("Bowser", 1000, 0, "Fire Breath"),
+                        new Character("Yoshi", 200, 0, "Powerful Bite"),
+                        new Character("Whomp", 100, 0, "Slam")
+                };
                 return;
             }
 
@@ -93,9 +122,12 @@ namespace MushroomPocket.Services
             while (character.HP > 0 && EnemyCharacter.HP > 0)
             {
                 // Friendly Attack
-                EnemyCharacter.HP = Math.Max(0, EnemyCharacter.HP - SkillDamages[character.Skill]);
+                int CharacterDamage = SkillDamages[character.Skill];
+                int DamageBoost = (int)Math.Floor((double)character.EXP / 100) * 5;
+                Console.WriteLine($"{DamageBoost}");
+                EnemyCharacter.HP = Math.Max(0, EnemyCharacter.HP - (CharacterDamage + DamageBoost));
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"{character.Name} used {character.Skill} and dealt {SkillDamages[character.Skill]}");
+                Console.WriteLine($"{character.Name} used {character.Skill} and dealt {CharacterDamage + DamageBoost}");
                 Console.ResetColor();
                 Console.WriteLine($"{EnemyCharacter.Name} is now at {EnemyCharacter.HP} HP");
                 Thread.Sleep(1000);
@@ -114,7 +146,8 @@ namespace MushroomPocket.Services
                 }
 
                 // Enemy Attack
-                character.HP = Math.Max(0, character.HP - SkillDamages[EnemyCharacter.Skill]);
+                int EnemyDamage = SkillDamages[EnemyCharacter.Skill];
+                character.HP = Math.Max(0, character.HP - EnemyDamage);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{EnemyCharacter.Name} used {EnemyCharacter.Skill} and dealt {SkillDamages[EnemyCharacter.Skill]}");
                 Console.ResetColor();
