@@ -14,7 +14,8 @@ using MushroomPocket.Services;
 
 // TODO: Implement GUID
 // TODO: ASCII Art?
-// TODO: Coins / Powerups system? Shop?
+// TODO: Powerups system?
+// TODO: Shop
 // TODO: A use for EXP? Damage Multiplier
 // TODO: Multiplayer??
 

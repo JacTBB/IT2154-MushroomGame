@@ -45,7 +45,7 @@ namespace MushroomPocket.Services
 
         public void Adventure()
         {
-            if (random.Next(0, 3) == 0)
+            if (random.Next(1, 3) == 1)
             {
                 FoundCoin();
             }
@@ -68,7 +68,9 @@ namespace MushroomPocket.Services
 
             int exp = random.Next(5, 10);
             character.EXP += exp;
+            Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine($"{character.Name} gained {exp} EXP.");
+            Console.ResetColor();
 
             pocketContext.SaveChanges();
         }
@@ -83,38 +85,52 @@ namespace MushroomPocket.Services
             }
 
             Character EnemyCharacter = AliveEnemies[random.Next(0, AliveEnemies.Count() - 1)];
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"You encountered {EnemyCharacter.Name} with {EnemyCharacter.HP}!");
+            Console.ResetColor();
             Thread.Sleep(1000);
 
             while (character.HP > 0 && EnemyCharacter.HP > 0)
             {
                 // Friendly Attack
                 EnemyCharacter.HP = Math.Max(0, EnemyCharacter.HP - SkillDamages[character.Skill]);
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"{character.Name} used {character.Skill} and dealt {SkillDamages[character.Skill]}");
+                Console.ResetColor();
                 Console.WriteLine($"{EnemyCharacter.Name} is now at {EnemyCharacter.HP} HP");
                 Thread.Sleep(1000);
 
                 if (EnemyCharacter.HP <= 0)
                 {
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{EnemyCharacter.Name} died, you won!");
+                    Console.ResetColor();
                     int exp = random.Next(20, 50);
                     character.EXP += exp;
+                    Console.ForegroundColor = ConsoleColor.Blue;
                     Console.WriteLine($"{character.Name} gained {exp} EXP.");
+                    Console.ResetColor();
                     break;
                 }
 
                 // Enemy Attack
                 character.HP = Math.Max(0, character.HP - SkillDamages[EnemyCharacter.Skill]);
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{EnemyCharacter.Name} used {EnemyCharacter.Skill} and dealt {SkillDamages[EnemyCharacter.Skill]}");
+                Console.ResetColor();
                 Console.WriteLine($"{character.Name} is now at {character.HP} HP");
                 Thread.Sleep(1000);
 
                 if (character.HP <= 0)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"{character.Name} died, you lost!");
+                    Console.ResetColor();
                     int exp = random.Next(5, 10);
                     character.EXP += exp;
+                    Console.ForegroundColor = ConsoleColor.Blue;
                     Console.WriteLine($"{character.Name} gained {exp} EXP.");
+                    Console.ResetColor();
                     break;
                 }
             }
