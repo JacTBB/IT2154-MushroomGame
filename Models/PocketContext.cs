@@ -11,6 +11,7 @@ namespace MushroomPocket.Models
     {
         public DbSet<Character> Pocket { get; set; }
         public DbSet<Coins> Coins { get; set; }
+        public DbSet<Item> Inventory { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

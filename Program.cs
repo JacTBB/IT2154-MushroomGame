@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using MushroomPocket.Models;
@@ -62,7 +63,8 @@ namespace MushroomPocket
             Console.WriteLine("(5). Remove characters");
             Console.WriteLine("(6). Begin adventure");
             Console.WriteLine("(7). Revive dead characters to 100 HP");
-            Console.WriteLine("(8). Show coins");
+            Console.WriteLine("(8). Show coins & inventory");
+            Console.WriteLine("(9). Shop");
             Console.WriteLine("Please only enter [1,2,3,4,5,6,7] or Q to quit: ");
 
             string option = Console.ReadLine();
@@ -92,7 +94,10 @@ namespace MushroomPocket
                     Revive();
                     break;
                 case "8":
-                    ShowCoins();
+                    ShowInventory();
+                    break;
+                case "9":
+                    Shop();
                     break;
                 case "q":
                     return false;
@@ -393,12 +398,13 @@ namespace MushroomPocket
         }
     
         /// <summary>
-        /// Shows user's current coins
+        /// Shows user's current coins and inventory
         /// </summary>
-        public static void ShowCoins()
+        public static void ShowInventory()
         {
             using (PocketContext pocketContext = new PocketContext())
             {
+                // Coins
                 if (pocketContext.Coins.FirstOrDefault() == null)
                 {
                     pocketContext.Coins.Add(new Coins(0));
@@ -407,6 +413,90 @@ namespace MushroomPocket
 
                 int Coins = pocketContext.Coins.First().Amount;
                 Console.WriteLine($"You have {Coins} coins.");
+
+                // Inventory
+                if (pocketContext.Inventory.Count() == 0)
+                {
+                    Console.WriteLine("You have no items!");
+                }
+
+                Dictionary<string, int> counter = new Dictionary<string, int>();
+                foreach (Item item in pocketContext.Inventory.ToList())
+                {
+                    if (counter.ContainsKey(item.Name))
+                    {
+                        counter[item.Name]++;
+                    }
+                    else
+                    {
+                        counter.Add(item.Name, 1);
+                    }
+                }
+
+                Console.WriteLine("\nItems:");
+                foreach (KeyValuePair<string, int> item in counter)
+                {
+                    Console.WriteLine($"{item.Value} {item.Key}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Allow users to shop for items and powerups
+        /// </summary>
+        public static void Shop()
+        {
+            List<KeyValuePair<string, int>> shopItems = new Dictionary<string, int>()
+            {
+                { "Health Potion", 10 },
+                { "Experience Potion", 20 },
+                { "Strength Potion", 30 },
+            }.ToList();
+
+            Console.WriteLine(new String('*', 30));
+            Console.WriteLine("Welcome to the Mushroom Shop");
+            Console.WriteLine(new String('*', 30));
+            Console.WriteLine("Select an item to buy:");
+
+            foreach (KeyValuePair<string, int> shopItem in shopItems.ToList())
+            {
+                Console.WriteLine($"({shopItems.IndexOf(shopItem)}). {shopItem.Key} - {shopItem.Value}");
+            }
+
+            string indexString = Console.ReadLine();
+            int index;
+
+            if (indexString.ToLower() == "q")
+            {
+                return;
+            }
+            if (int.TryParse(indexString, out index) == false)
+            {
+                Console.WriteLine("Invalid option");
+                return;
+            }
+            if (index > shopItems.Count() - 1)
+            {
+                Console.WriteLine("Invalid option");
+                return;
+            }
+
+            var selectedItem = shopItems[index];
+
+            using (PocketContext pocketContext = new PocketContext())
+            {
+                int Coins = pocketContext.Coins.FirstOrDefault()!.Amount;
+                if (Coins < selectedItem.Value)
+                {
+                    Console.WriteLine("Insufficient coins!");
+                    return;
+                }
+
+                pocketContext.Inventory.Add(new Item(selectedItem.Key));
+                pocketContext.Coins.First().Amount -= selectedItem.Value;
+                Console.WriteLine("Purchase success!");
+
+                pocketContext.SaveChanges();
             }
         }
     }
