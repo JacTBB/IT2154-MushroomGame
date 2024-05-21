@@ -10,13 +10,13 @@ namespace MushroomPocket.Models
     public class Coins
     {
         [Key]
-        public int Id { get; set; }
+        public string GUID { get; set; }
         public int Amount { get; set; }
 
         public Coins() { } // For EntityFramework
         public Coins(int amount)
         {
-            Id = 1;
+            GUID = Guid.NewGuid().ToString();
             Amount = amount;
         }
     }

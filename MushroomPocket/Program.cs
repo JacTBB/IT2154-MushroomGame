@@ -13,11 +13,9 @@ using MushroomPocket.Models;
 using MushroomPocket.Models.Characters;
 using MushroomPocket.Services;
 
-// TODO: Implement GUID
 // TODO: ASCII Art?
-// TODO: Powerups system?
-// TODO: Shop
-// TODO: Multiplayer??
+// TODO: Turn-Based Battle
+// TODO: Multiplayer Player Leaderboard & Battle History
 
 namespace MushroomPocket
 {

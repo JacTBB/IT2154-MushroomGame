@@ -124,7 +124,6 @@ namespace MushroomPocket.Services
                 // Friendly Attack
                 int CharacterDamage = SkillDamages[character.Skill];
                 int DamageBoost = (int)Math.Floor((double)character.EXP / 100) * 5;
-                Console.WriteLine($"{DamageBoost}");
                 EnemyCharacter.HP = Math.Max(0, EnemyCharacter.HP - (CharacterDamage + DamageBoost));
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"{character.Name} used {character.Skill} and dealt {CharacterDamage + DamageBoost}");
