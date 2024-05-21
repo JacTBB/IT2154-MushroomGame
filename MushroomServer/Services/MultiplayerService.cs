@@ -63,6 +63,10 @@ namespace MushroomServer.Services
 
         public Result GetResult(string resultId)
         {
+            foreach (var r in Results)
+            {
+                Console.WriteLine(r.Key);
+            }
             Result result = Results.First(r => r.Key == resultId).Value;
             return result;
         }
@@ -103,13 +107,13 @@ namespace MushroomServer.Services
                 // Character 1 Attack
                 int Character1Damage = SkillDamages[character1.Skill];
                 int DamageBoost1 = (int)Math.Floor((double)character1.EXP / 100) * 5;
-                character1.HP = Math.Max(0, character1.HP - (Character1Damage + DamageBoost1));
+                character2.HP = Math.Max(0, character2.HP - (Character1Damage + DamageBoost1));
                 BattleLog.Add($"{character1.Name} used {character1.Skill} and dealt {Character1Damage + DamageBoost1}");
                 BattleLog.Add($"{character2.Name} is now at {character2.HP} HP");
 
                 if (character2.HP <= 0)
                 {
-                    BattleLog.Add($"{character2.Name} died, you won!");
+                    BattleLog.Add($"{character2.Name} died, {character1.Name} won!");
                     int exp = random.Next(20, 50);
                     character1.EXP += exp;
                     BattleLog.Add($"{character1.Name} gained {exp} EXP");
@@ -119,13 +123,13 @@ namespace MushroomServer.Services
                 // Character 2 Attack
                 int Character2Damage = SkillDamages[character2.Skill];
                 int DamageBoost2 = (int)Math.Floor((double)character2.EXP / 100) * 5;
-                character2.HP = Math.Max(0, character2.HP - (Character2Damage + DamageBoost2));
+                character1.HP = Math.Max(0, character1.HP - (Character2Damage + DamageBoost2));
                 BattleLog.Add($"{character2.Name} used {character2.Skill} and dealt {Character2Damage + DamageBoost2}");
                 BattleLog.Add($"{character1.Name} is now at {character1.HP} HP");
 
                 if (character1.HP <= 0)
                 {
-                    BattleLog.Add($"{character1.Name} died, you won!");
+                    BattleLog.Add($"{character1.Name} died, {character2.Name} won!");
                     int exp = random.Next(20, 50);
                     character2.EXP += exp;
                     BattleLog.Add($"{character2.Name} gained {exp} EXP");

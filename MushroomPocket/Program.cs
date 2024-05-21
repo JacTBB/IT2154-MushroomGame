@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using MushroomPocket.Models;
 using MushroomPocket.Models.Characters;
 using MushroomPocket.Services;
@@ -23,7 +24,7 @@ namespace MushroomPocket
     {
         public static List<MushroomMaster> MushroomMastersList;
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {   
             //MushroomMaster criteria list for checking character transformation availability.   
             /*************************************************************************
@@ -42,14 +43,14 @@ namespace MushroomPocket
             }
 
             while (true) {
-                if (!Menu())
+                if (!await Menu())
                 {
                     break;
                 }
             }
         }
 
-        public static bool Menu()
+        public static async Task<bool> Menu()
         {
             Console.WriteLine(new String('*', 30));
             Console.WriteLine("Welcome to Mushroom Pocket App");
@@ -63,6 +64,7 @@ namespace MushroomPocket
             Console.WriteLine("(7). Revive dead characters to 100 HP");
             Console.WriteLine("(8). Show coins & inventory");
             Console.WriteLine("(9). Shop");
+            Console.WriteLine("(0). Multiplayer Battle");
             Console.WriteLine("Please only enter [1,2,3,4,5,6,7] or Q to quit: ");
 
             string option = Console.ReadLine();
@@ -96,6 +98,9 @@ namespace MushroomPocket
                     break;
                 case "9":
                     Shop();
+                    break;
+                case "0":
+                    await MPBattle();
                     break;
                 case "q":
                     return false;
@@ -495,6 +500,93 @@ namespace MushroomPocket
                 Console.WriteLine("Purchase success!");
 
                 pocketContext.SaveChanges();
+            }
+        }
+
+        /// <summary>
+        /// Multiplayer Battle. Connect to a server to play.
+        /// </summary>
+        public static async Task MPBattle()
+        {
+            using (PocketContext pocketContext = new PocketContext())
+            {
+                #region Connect Server
+                MPBattleService service;
+
+                Console.Write("Enter server host and port [localhost:5000]: ");
+                string host = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(host))
+                {
+                    Console.WriteLine("Using default of localhost:5000...");
+                    host = "localhost:5000";
+                }
+
+                try
+                {
+                    service = new MPBattleService(host);
+                    bool ServerOnline = await service.CheckServer();
+                    if (!ServerOnline)
+                    {
+                        throw new Exception();
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Invalid host/port specified!");
+                    return;
+                }
+                #endregion
+
+                #region Select Character
+                int DeadCharactersCount = pocketContext.Pocket.Where(c => c.HP == 0).ToList().Count();
+                List<Character> Characters = pocketContext.Pocket.OrderByDescending(c => c.HP).ToList();
+                Character CurrentCharacter;
+
+                if (DeadCharactersCount == pocketContext.Pocket.Count())
+                {
+                    Console.WriteLine("All characters are dead, please revive them first.");
+                    return;
+                }
+
+                Console.WriteLine("Choose your character:");
+                Console.WriteLine("Name - HP - EXP");
+                foreach (Character character in Characters)
+                {
+                    if (character.HP > 0)
+                    {
+                        Console.WriteLine($"{Characters.IndexOf(character)} - {character.Name} - {character.HP} - {character.EXP}");
+                    }
+                }
+
+                while (true)
+                {
+                    int index;
+                    string input = Console.ReadLine();
+                    if (!int.TryParse(input, out index)) { Console.WriteLine("Invalid number!"); continue; }
+                    if (index < 0 || index > Characters.Count() - 1) { Console.WriteLine($"Index must be between 0 and {Characters.Count()}!"); continue; }
+                    CurrentCharacter = Characters[index];
+                    break;
+                }
+
+                Console.WriteLine($"{CurrentCharacter.Name} selected");
+                #endregion
+
+                #region Get GUID
+                if (pocketContext.Coins.FirstOrDefault() == null)
+                {
+                    pocketContext.Coins.Add(new Coins(0));
+                    pocketContext.SaveChanges();
+                }
+
+                string GUID = pocketContext.Coins.First().GUID;
+                #endregion
+
+                List<string> BattleLog = await service.Battle(pocketContext, GUID, CurrentCharacter);
+                foreach (string log in BattleLog)
+                {
+                    Console.WriteLine(log);
+                }
             }
         }
     }
