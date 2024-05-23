@@ -136,7 +136,9 @@ namespace MushroomPocket.Services
 
                 if (FriendlyFightChoice == "Run")
                 {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine($"{character.Name} ran away");
+                    Console.ResetColor();
                     break;
                 }
 
@@ -164,7 +166,7 @@ namespace MushroomPocket.Services
                 // Friendly Attack
                 if (FriendlyFightChoice == "Attack")
                 {
-                    Attack(character, EnemyCharacter, false, true, FriendlyStrengthBoost);
+                    Attack(character, EnemyCharacter, false, true, FriendlyStrengthBoost, true);
                     if (FriendlyStrengthBoost > 0)
                     {
                         FriendlyStrengthBoost = 0;
@@ -172,10 +174,15 @@ namespace MushroomPocket.Services
                 }
                 Thread.Sleep(1000);
 
+                if (EnemyCharacter.HP <= 0)
+                {
+                    break;
+                }
+
                 // Enemy Attack
                 if (EnemyFightChoice == "Attack")
                 {
-                    Attack(EnemyCharacter, character, FriendlyFightChoice == "Doge", false, 0);
+                    Attack(EnemyCharacter, character, FriendlyFightChoice == "Doge", false, 0, false);
                 }
                 Thread.Sleep(1000);
             }
@@ -263,7 +270,7 @@ namespace MushroomPocket.Services
         /// <summary>
         /// Attack Damage logic
         /// </summary>
-        private void Attack(Character char1, Character char2, bool Doge, bool GrantEXP, int StrengthBoost)
+        private void Attack(Character char1, Character char2, bool Doge, bool GrantEXP, int StrengthBoost, bool Color)
         {
             int Dmg = SkillDamages[char1.Skill];
             int DmgBoost = (int)Math.Floor((double)char1.EXP / 100) * 5;
@@ -286,18 +293,24 @@ namespace MushroomPocket.Services
 
             int DmgDealt = (int)Math.Round((Dmg + DmgBoost) * DogeMultiplier);
             char2.HP = Math.Max(0, char2.HP - DmgDealt);
+            if (Color) Console.ForegroundColor = ConsoleColor.Green; else Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"{char1.Name} used {char1.Skill} and dealt {DmgDealt}");
             Console.WriteLine($"{char2.Name} is now at {char2.HP} HP");
+            Console.ResetColor();
 
             Thread.Sleep(500);
             if (char2.HP <= 0)
             {
+                if (Color) Console.ForegroundColor = ConsoleColor.Green; else Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{char2.Name} died, {char1.Name} won!");
+                Console.ResetColor();
                 if (GrantEXP)
                 {
                     int exp = random.Next(20, 50);
                     char1.EXP += exp;
+                    Console.ForegroundColor = ConsoleColor.Blue;
                     Console.WriteLine($"{char1.Name} gained {exp} EXP.");
+                    Console.ResetColor();
                 }
             }
         }

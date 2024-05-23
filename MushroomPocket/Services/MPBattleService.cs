@@ -72,7 +72,7 @@ namespace MushroomPocket.Services
             // Websocket
             ClientWebSocket webSocket = new ClientWebSocket();
             await webSocket.ConnectAsync(new Uri($"ws://{ServerHost}/ws/{resultId}"), CancellationToken.None);
-            Console.WriteLine("Connected to WebSocket server");
+            Console.WriteLine("Connected to WebSocket server\n");
 
             var buffer = new byte[1024 * 4];
             while (true)
@@ -103,7 +103,29 @@ namespace MushroomPocket.Services
                     continue;
                 }
 
+                if (message.StartsWith("Red;"))
+                {
+                    message = message.Substring(5);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                if (message.StartsWith("Yellow;"))
+                {
+                    message = message.Substring(7);
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+                if (message.StartsWith("Green;"))
+                {
+                    message = message.Substring(6);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+                if (message.StartsWith("Blue;"))
+                {
+                    message = message.Substring(5);
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                }
+
                 Console.WriteLine($"{message}");
+                Console.ResetColor();
             }
 
             // Get Battle Results

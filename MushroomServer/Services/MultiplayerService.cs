@@ -63,11 +63,11 @@ namespace MushroomServer.Services
             }
         }
 
-        private void SendData(string id, string data)
+        private void SendData(string id, string data, string color = "")
         {
             if (Websockets.TryGetValue(id, out var socket) && socket.State == WebSocketState.Open)
             {
-                var bytes = Encoding.UTF8.GetBytes(data);
+                var bytes = Encoding.UTF8.GetBytes(color+data);
                 socket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
             }
         }
@@ -150,7 +150,7 @@ namespace MushroomServer.Services
 
             #region Validate Character & Websocket Connection
             // Allow Player 2 WS to connect
-            await Task.Delay(5000);
+            await Task.Delay(500);
 
             if (character1 == null)
             {
@@ -208,8 +208,8 @@ namespace MushroomServer.Services
             SendData(player2.ResultID!, "You are player 2");
 
             BattleLog.Add($"P1 {character1.Name} encountered P2 {character2.Name}!");
-            SendData(player1.ResultID!, BattleLog.Last());
-            SendData(player2.ResultID!, BattleLog.Last());
+            SendData(player1.ResultID!, BattleLog.Last(), "Yellow;");
+            SendData(player2.ResultID!, BattleLog.Last(), "Yellow;");
 
             int char1StrengthBoost = 0;
             int char2StrengthBoost = 0;
@@ -221,17 +221,28 @@ namespace MushroomServer.Services
 
                 if (char1FightChoice == "Run")
                 {
+
                     BattleLog.Add($"P1 {character1.Name} ran away");
-                    SendData(player1.ResultID!, BattleLog.Last());
-                    SendData(player2.ResultID!, BattleLog.Last());
+                    SendData(player1.ResultID!, BattleLog.Last(), "Yellow;");
+                    SendData(player2.ResultID!, BattleLog.Last(), "Yellow;");
+
+                    int exp = random.Next(5, 10);
+                    character2.EXP += exp;
+                    BattleLog.Add($"P2 {character2.Name} gained {exp} EXP.");
+                    SendData(player2.ResultID!, BattleLog.Last(), "Blue;");
                     break;
                 }
 
                 if (char2FightChoice == "Run")
                 {
                     BattleLog.Add($"P2 {character2.Name} ran away");
-                    SendData(player1.ResultID!, BattleLog.Last());
-                    SendData(player2.ResultID!, BattleLog.Last());
+                    SendData(player1.ResultID!, BattleLog.Last(), "Yellow;");
+                    SendData(player2.ResultID!, BattleLog.Last(), "Yellow;");
+
+                    int exp = random.Next(5, 10);
+                    character1.EXP += exp;
+                    BattleLog.Add($"P1 {character1.Name} gained {exp} EXP.");
+                    SendData(player1.ResultID!, BattleLog.Last(), "Blue;");
                     break;
                 }
 
@@ -289,10 +300,15 @@ namespace MushroomServer.Services
                     }
                 }
 
+                if (character2.HP <= 0)
+                {
+                    break;
+                }
+
                 // Character 2 Attack
                 if (char2FightChoice == "Attack")
                 {
-                    Attack(character2, character1, char1FightChoice == "Doge", true, char2StrengthBoost, player1.ResultID!, player2.ResultID!, BattleLog, true);
+                    Attack(character2, character1, char1FightChoice == "Doge", true, char2StrengthBoost, player2.ResultID!, player1.ResultID!, BattleLog, true);
                     if (char2StrengthBoost > 0)
                     {
                         char2StrengthBoost = 0;
@@ -354,25 +370,24 @@ namespace MushroomServer.Services
             int DmgDealt = (int)Math.Round((Dmg + DmgBoost) * DogeMultiplier);
             char2.HP = Math.Max(0, char2.HP - DmgDealt);
             BattleLog.Add($"{char1P} {char1.Name} used {char1.Skill} and dealt {DmgDealt}");
-            SendData(resultID1, BattleLog.Last());
-            SendData(resultID2, BattleLog.Last());
+            SendData(resultID1, BattleLog.Last(), "Green;");
+            SendData(resultID2, BattleLog.Last(), "Red;");
             BattleLog.Add($"{char2P} {char2.Name} is now at {char2.HP} HP");
-            SendData(resultID1, BattleLog.Last());
-            SendData(resultID2, BattleLog.Last());
+            SendData(resultID1, BattleLog.Last(), "Green;");
+            SendData(resultID2, BattleLog.Last(), "Red;");
 
             Thread.Sleep(500);
             if (char2.HP <= 0)
             {
                 BattleLog.Add($"{char2P} {char2.Name} died, P1 {char1.Name} won!");
-                SendData(resultID1, BattleLog.Last());
-                SendData(resultID2, BattleLog.Last());
+                SendData(resultID1, BattleLog.Last(), "Green;");
+                SendData(resultID2, BattleLog.Last(), "Red;");
                 if (GrantEXP)
                 {
                     int exp = random.Next(20, 50);
                     char1.EXP += exp;
                     BattleLog.Add($"{char1P} {char1.Name} gained {exp} EXP.");
-                    SendData(resultID1, BattleLog.Last());
-                    SendData(resultID2, BattleLog.Last());
+                    SendData(resultID1, BattleLog.Last(), "Blue;");
                 }
             }
         }
