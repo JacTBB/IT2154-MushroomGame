@@ -186,8 +186,9 @@ namespace MushroomPocket.Services
         /// <summary>
         /// Get fight choice. if inventory selected, consume item.
         /// </summary>
-        private string FightChoice()
+        public string FightChoice()
         {
+            Console.WriteLine("");
             Console.WriteLine("Choose an option:");
             Console.WriteLine("(1) Attack");
             Console.WriteLine("(2) Doge");

@@ -9,12 +9,15 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using System.Net.WebSockets;
+using System.Threading;
 
 namespace MushroomPocket.Services
 {
     public class MPBattleService
     {
         private HttpClient client;
+        private string ServerHost;
 
         public MPBattleService(string serverHost)
         {
@@ -23,6 +26,8 @@ namespace MushroomPocket.Services
             client = new HttpClient(handler);
             client.BaseAddress = new Uri($"http://{serverHost}");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+            ServerHost = serverHost;
         }
 
         public async Task<bool> CheckServer()
@@ -63,6 +68,43 @@ namespace MushroomPocket.Services
             string resultIdJson = res.Content.ReadAsStringAsync().Result;
             string resultId = JsonSerializer.Deserialize<string>(resultIdJson);
             Console.WriteLine("Awaiting enemy player...");
+
+            // Websocket
+            ClientWebSocket webSocket = new ClientWebSocket();
+            await webSocket.ConnectAsync(new Uri($"ws://{ServerHost}/ws/{resultId}"), CancellationToken.None);
+            Console.WriteLine("Connected to WebSocket server");
+
+            var buffer = new byte[1024 * 4];
+            while (true)
+            {
+                var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", CancellationToken.None);
+                    break;
+                }
+
+                var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+
+                if (message.StartsWith("Get;"))
+                {
+                    Console.WriteLine(message.Substring(5));
+                    string response = Console.ReadLine();
+                    var bytes = Encoding.UTF8.GetBytes(response);
+                    await webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                    continue;
+                }
+
+                if (message.StartsWith("FightChoice;"))
+                {
+                    string fightChoice = new AdventureService(pocketContext, character).FightChoice();
+                    var bytes = Encoding.UTF8.GetBytes(fightChoice);
+                    await webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                    continue;
+                }
+
+                Console.WriteLine($"{message}");
+            }
 
             // Get Battle Results
             while (BattleLog == null)

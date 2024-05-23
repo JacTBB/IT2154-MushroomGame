@@ -15,7 +15,6 @@ using MushroomPocket.Models.Characters;
 using MushroomPocket.Services;
 
 // TODO: ASCII Art?
-// TODO: Turn-Based Battle
 // TODO: Multiplayer Player Leaderboard & Battle History
 
 namespace MushroomPocket
@@ -582,11 +581,7 @@ namespace MushroomPocket
                 string GUID = pocketContext.Coins.First().GUID;
                 #endregion
 
-                List<string> BattleLog = await service.Battle(pocketContext, GUID, CurrentCharacter);
-                foreach (string log in BattleLog)
-                {
-                    Console.WriteLine(log);
-                }
+                await service.Battle(pocketContext, GUID, CurrentCharacter);
             }
         }
     }
