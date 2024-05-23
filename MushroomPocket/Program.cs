@@ -14,8 +14,10 @@ using MushroomPocket.Models;
 using MushroomPocket.Models.Characters;
 using MushroomPocket.Services;
 
-// TODO: ASCII Art?
+// TODO: Improve ASCII Art
 // TODO: Multiplayer Player Leaderboard & Battle History
+// TODO: Multiplayer Mode (Server DB, Accounts System, Prevent Exploits)
+// TODO: List all characters like library?
 
 namespace MushroomPocket
 {

@@ -1,4 +1,5 @@
 ﻿using MushroomPocket.Models;
+using MushroomPocket.Models.Characters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,9 +45,9 @@ namespace MushroomPocket.Services
         /// </summary>
         private static List<Character> EnemyCharacters = new List<Character>
         {
-                new Character("Bowser", 1000, 0, "Fire Breath"),
-                new Character("Yoshi", 200, 0, "Powerful Bite"),
-                new Character("Whomp", 100, 0, "Slam")
+                new Bowser(1000, 0),
+                new Yoshi(200, 0),
+                new Whomp(100, 0)
         };
 
         public AdventureService(PocketContext _pocketContext, Character sentCharacter)
@@ -121,6 +122,8 @@ namespace MushroomPocket.Services
             #endregion
 
             Character EnemyCharacter = AliveEnemies[random.Next(0, AliveEnemies.Count() - 1)];
+            Console.WriteLine(character.Art());
+            Console.WriteLine(EnemyCharacter.Art());
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"You encountered {EnemyCharacter.Name} with {EnemyCharacter.HP}!");
             Console.ResetColor();
