@@ -14,11 +14,6 @@ using MushroomPocket.Models;
 using MushroomPocket.Models.Characters;
 using MushroomPocket.Services;
 
-// TODO: Improve ASCII Art
-// TODO: Multiplayer Player Leaderboard & Battle History
-// TODO: Multiplayer Mode (Server DB, Accounts System, Prevent Exploits)
-// TODO: List all characters like library?
-
 namespace MushroomPocket
 {
     class Program
@@ -161,7 +156,7 @@ namespace MushroomPocket
                     Console.WriteLine("Invalid Character");
                     return;
             }
-            Console.WriteLine(character.Skill);
+            Console.WriteLine($"Character's Skill: {character.Skill}");
 
             using (PocketContext pocketContext = new PocketContext())
             {
@@ -422,6 +417,7 @@ namespace MushroomPocket
                 if (pocketContext.Inventory.Count() == 0)
                 {
                     Console.WriteLine("You have no items!");
+                    return;
                 }
 
                 Dictionary<string, int> counter = new Dictionary<string, int>();

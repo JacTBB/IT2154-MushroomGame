@@ -79,6 +79,7 @@ namespace MushroomPocket.Services
             if (pocketContext.Coins.FirstOrDefault() == null)
             {
                 pocketContext.Coins.Add(new Coins(0));
+                pocketContext.SaveChanges();
             }
             pocketContext.Coins.First().Amount += coins;
 
