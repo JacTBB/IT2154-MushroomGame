@@ -57,7 +57,7 @@ namespace MushroomServer.Services
 
         public void CloseWebsocket(string id)
         {
-            if (Websockets.TryGetValue(id, out WebSocket websocket)) {
+            if (Websockets.TryGetValue(id, out WebSocket? websocket)) {
                 Console.WriteLine($"WS Close: {id}");
                 websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Finished Battle", CancellationToken.None);
             }
