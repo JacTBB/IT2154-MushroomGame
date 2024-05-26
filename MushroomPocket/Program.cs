@@ -10,16 +10,16 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MushroomPocket.Models;
-using MushroomPocket.Models.Characters;
-using MushroomPocket.Services;
+using MushroomServer.Models;
+using MushroomServer.Models.Characters;
+using MushroomServer.Services;
 
 // TODO: Improve ASCII Art
 // TODO: Multiplayer Player Leaderboard & Battle History
 // TODO: Multiplayer Mode (Server DB, Accounts System, Prevent Exploits)
-// TODO: List all characters like library?
+// TODO: List all characters like library? (Temp for dev checking)
 
-namespace MushroomPocket
+namespace MushroomServer
 {
     class Program
     {
@@ -102,6 +102,9 @@ namespace MushroomPocket
                     break;
                 case "0":
                     await MPBattle();
+                    break;
+                case "m":
+                    await Multiplayer();
                     break;
                 case "q":
                     return false;
@@ -584,6 +587,69 @@ namespace MushroomPocket
                 #endregion
 
                 await service.Battle(pocketContext, GUID, CurrentCharacter);
+            }
+        }
+
+        /// <summary>
+        /// Multiplayer Mode. Connect to user account on server and use server-stored database.
+        /// </summary>
+        public static async Task Multiplayer()
+        {
+            #region Connect Server
+                MultiplayerService service;
+
+                Console.Write("Enter server host and port [localhost:5162]: ");
+                string host = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(host))
+                {
+                    Console.WriteLine("Using default of localhost:5162...");
+                    host = "localhost:5162";
+                }
+
+                try
+                {
+                    service = new MultiplayerService(host);
+                    bool ServerOnline = await service.CheckServer();
+                    if (!ServerOnline)
+                    {
+                        throw new Exception();
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Invalid host/port specified!");
+                    return;
+                }
+            #endregion
+
+            Console.WriteLine("(1). Login");
+            Console.WriteLine("(2). Register");
+            string option = Console.ReadLine();
+            Console.WriteLine("\n");
+
+            static (string, string) GetCredentials()
+            {
+                Console.WriteLine("Enter Username:");
+                string username = Console.ReadLine();
+                Console.WriteLine("Enter Password:");
+                string password = Console.ReadLine();
+                return (username, password);
+            }
+
+            switch (option.ToLower())
+            {
+                case "1":
+                    var (username1, password1) = GetCredentials();
+                    await service.Connect(username1, password1);
+                    break;
+                case "2":
+                    var (username2, password2) = GetCredentials();
+                    await service.Register(username2, password2);
+                    break;
+                default:
+                    Console.WriteLine("Invalid Input");
+                    break;
             }
         }
     }

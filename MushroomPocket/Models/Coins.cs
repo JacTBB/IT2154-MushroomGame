@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MushroomPocket.Models
+namespace MushroomServer.Models
 {
     public class Coins
     {

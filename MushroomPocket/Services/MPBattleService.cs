@@ -1,4 +1,4 @@
-﻿using MushroomPocket.Models;
+﻿using MushroomServer.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 using System.Net.WebSockets;
 using System.Threading;
 
-namespace MushroomPocket.Services
+namespace MushroomServer.Services
 {
     public class MPBattleService
     {

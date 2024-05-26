@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace MushroomPocket.Models
+namespace MushroomServer.Models
 {
     public class PocketContext : DbContext
     {

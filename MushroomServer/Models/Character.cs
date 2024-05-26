@@ -6,6 +6,7 @@ namespace MushroomServer.Models
     {
         [Key]
         public int Id { get; set; }
+        public Player Player { get; set; }
         public string Name { get; set; }
         public int HP { get; set; }
         public int EXP { get; set; }

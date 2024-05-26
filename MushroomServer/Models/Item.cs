@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace MushroomServer.Models
 {
@@ -11,6 +6,7 @@ namespace MushroomServer.Models
     {
         [Key]
         public int Id { get; set; }
+        public Player Player { get; set; }
         public string Name { get; set; }
 
         public Item() { } // For EntityFramework

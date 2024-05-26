@@ -1,11 +1,21 @@
-﻿namespace MushroomServer.Models
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
+
+namespace MushroomServer.Models
 {
     public class Result
     {
-        public required string GUID { get; set; }
-        public required string ResultID { get; set; }
-        public required string Status { get; set; }
-        public List<string>? BattleLog { get; set; }
-        public Character? Character { get; set; }
+        [Key]
+        public string ResultID { get; set; }
+        public string Status { get; set; }
+        public string P1BattleLogString { get; set; }
+        public string P2BattleLogString { get; set; }
+        public string OriginalCharacter1 { get; set; }
+        public string OriginalCharacter2 { get; set; }
+
+        public Result() { } // For EntityFramework
     }
 }

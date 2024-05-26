@@ -1,5 +1,5 @@
-﻿using MushroomPocket.Models;
-using MushroomPocket.Models.Characters;
+﻿using MushroomServer.Models;
+using MushroomServer.Models.Characters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MushroomPocket.Services
+namespace MushroomServer.Services
 {
     /// <summary>
     /// Adventure Service to handle characters going on adventures.

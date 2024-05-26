@@ -1,4 +1,4 @@
-﻿using MushroomPocket.Models.Characters;
+﻿using MushroomServer.Models.Characters;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MushroomPocket.Models
+namespace MushroomServer.Models
 {
     public class Character
     {

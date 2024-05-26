@@ -1,4 +1,6 @@
 
+using MushroomServer.Models;
+
 namespace MushroomServer
 {
     public class Program
@@ -36,6 +38,12 @@ namespace MushroomServer
 
 
             app.MapControllers();
+
+            // Database
+            using (DBContext dbContext = new DBContext())
+            {
+                dbContext.Database.EnsureCreated();
+            }
 
             app.Run();
         }
