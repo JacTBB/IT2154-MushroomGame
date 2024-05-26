@@ -1,4 +1,3 @@
-
 namespace MushroomServer
 {
     public class Program
